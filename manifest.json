@@ -1,0 +1,15 @@
+{
+  "name": "FleetMS Simple Portable",
+  "short_name": "FleetMS",
+  "start_url": "FleetMS_Simple_Portable.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976d2",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
