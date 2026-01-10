@@ -4,17 +4,13 @@
 <meta charset="utf-8">
 <title>CONTROL Y MANTENIMIENTO DE VEHÍCULOS</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
-<link rel="icon" type="image/png" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="manifest" href="manifest.json">
-
 <style>
 /* -------------------------
    Estilos generales
    ------------------------- */
 
 
+body{
   font-family:Arial,Helvetica,sans-serif;
   margin:0;
   color:#222;
@@ -390,59 +386,6 @@ th:nth-child(3), td:nth-child(3) { width:90px; }
   }
 }
 
-/* ============================= */
-/* MENÚ HAMBURGUESA SOLO MÓVIL   */
-/* ============================= */
-
-@media (max-width: 768px) {
-
-  /* Mostrar botón hamburguesa */
- #menuToggle {
-  display: block !important;
-}
-
-
-  /* Menú CERRADO por defecto */
-  .sidebar {
-    display: none !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 240px;
-    height: 100vh;
-    background: #ffffff;
-    z-index: 1000;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.35);
-    overflow-y: auto;
-    padding-top: 10px;
-  }
-
-  /* Menú ABIERTO */
-  body.menu-open .sidebar {
-    display: block !important;
-  }
-
-  /* Evitar que el contenido quede tapado */
-  body.menu-open .main {
-    filter: blur(1px);
-  }
-}
-/* Botón hamburguesa base */
-#menuToggle {
-  display: none;
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 3000; /* MÁS ALTO QUE TODO */
-  font-size: 22px;
-  padding: 6px 10px;
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
 
 
 </style>
@@ -453,11 +396,7 @@ th:nth-child(3), td:nth-child(3) { width:90px; }
 </head>
 <body>
 
-<!-- BOTÓN HAMBURGUESA (MÓVIL) -->
-<button id="menuToggle" onclick="toggleMenu()">☰</button>
-
 <script>
-
 /* =================================================
    FleetMS Simple Portable
    DEMO 30 DÍAS + LICENCIA POR EQUIPO (OFFLINE)
@@ -636,34 +575,40 @@ function showExpiredScreen(deviceId){
 
     </div>
 
-    <div class="container">
-      <div class="card" id="left">
-        <h2>Vehículos <span id="totalCount" class="small"></span></h2>
-        <div class="filterrow">
-          <input id="q" placeholder="Buscar matrícula, modelo..." oninput="renderTable()">
-          <select id="filterFuel" onchange="renderTable()">
-            <option value="">Combustible (todos)</option>
-            <option>Gasolina</option><option>Diésel</option><option>Híbrido</option><option>Eléctrico</option>
-          </select>
-          <button class="btn" onclick="showAddForm()">Nuevo vehículo</button>
-        </div>
+   <div class="container">
+  <div class="card" id="left">
+    <h2>Vehículos <span id="totalCount" class="small"></span></h2>
 
-        <div id="alertasSection" class="small" style="margin-bottom:6px;">Alertas próximas (30 días):</div>
-        <div id="alerts"></div>
-
-        <div id="tableWrap" style="margin-top:8px;"></div>
-      </div>
-
-      <div class="card" id="right">
-        <h2 id="detalleTitle">Ficha / Edición</h2>
-        <div id="formArea"></div>
-        <hr>
-        <h3 id="detalleSection">Vista rápida del vehículo</h3>
-        <div id="quickView" class="small"></div>
-      </div>
+    <div class="filterrow">
+      <input id="q" placeholder="Buscar matrícula, modelo..." oninput="renderTable()">
+      <select id="filterFuel" onchange="renderTable()">
+        <option value="">Combustible (todos)</option>
+        <option>Gasolina</option>
+        <option>Diésel</option>
+        <option>Híbrido</option>
+        <option>Eléctrico</option>
+      </select>
+      <button class="btn" onclick="showAddForm()">Nuevo vehículo</button>
     </div>
+
+    <!-- ALERTAS -->
+    <div id="alertasSection" class="small" style="margin-bottom:6px;">
+      <div id="alerts"></div>
+      <div id="maintenanceAlerts" style="margin-top:6px;"></div>
+    </div>
+
+    <div id="tableWrap" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="card" id="right">
+    <h2 id="detalleTitle">Ficha / Edición</h2>
+    <div id="formArea"></div>
+    <hr>
+    <h3 id="detalleSection">Vista rápida del vehículo</h3>
+    <div id="quickView" class="small"></div>
   </div>
 </div>
+
 
 <input type="file" id="importFile" style="display:none" onchange="importDataFile(event)">
 
@@ -790,6 +735,8 @@ function renderTable(){
 
   document.getElementById('totalCount').innerText = `(${rows.length})`;
   renderAlerts();
+renderMaintenanceAlerts();
+
 
   if(rows.length==0){
     document.getElementById('tableWrap').innerHTML = '<div class="nodata">No hay vehículos. Crea uno nuevo.</div>';
@@ -878,6 +825,69 @@ function renderAlerts(){
   document.getElementById('alerts').innerHTML = out || 
     '<div class="small">Sin alertas próximas (30 días)</div>';
 }
+function renderMaintenanceAlerts(){
+  let data = loadAll();
+  let out = '';
+  let now = new Date();
+
+  data.vehicles.forEach(v=>{
+    data.maintenance
+      .filter(m => m.vehicleId === v.id)
+      .forEach(m => {
+
+        // No hay ni fecha ni km → no alerta
+        if(!m.date && !m.nextKm) return;
+
+        // --- FECHA ---
+        let dateOverdue = false;
+        let dateNear = false;
+
+        if(m.date){
+          let d = new Date(m.date);
+          if(!isNaN(d)){
+            dateOverdue = d < now;
+            dateNear = !dateOverdue && isDateNear(m.date, 30);
+          }
+        }
+
+        // --- KM ---
+        let kmOverdue = false;
+        let kmNear = false;
+
+        if(m.nextKm && v.km){
+          let diff = m.nextKm - v.km;
+          kmOverdue = diff <= 0;
+          kmNear = diff > 0 && diff <= 1000;
+        }
+
+        // Si no hay nada relevante → no alerta
+        if(!dateOverdue && !dateNear && !kmOverdue && !kmNear) return;
+
+        // Prioridad: CADUCADO > PRÓXIMO | FECHA > KM
+        let overdue = dateOverdue || kmOverdue;
+        let reason = dateOverdue || dateNear ? 'fecha' : 'km';
+        let value  = reason === 'fecha'
+          ? m.date
+          : `${m.nextKm} km`;
+
+        out += `
+          <div class="alert ${overdue ? 'overdue' : ''}">
+            <a href="#"
+               onclick="viewVehicle('${v.id}'); return false;">
+              Mantenimiento ${overdue ? 'CADUCADO' : 'próximo'} (${reason}):
+              <strong>${v.matricula}</strong> – ${value}
+            </a>
+          </div>
+        `;
+      });
+  });
+
+  document.getElementById('maintenanceAlerts').innerHTML =
+    out || '<div class="small">Sin mantenimientos próximos (30 días / 1000 km)</div>';
+}
+
+
+
 // ---- Vista vehículo, historial, mantenimiento y documentos ----
 function viewVehicle(id){
   let data = loadAll();
@@ -957,20 +967,29 @@ function viewVehicle(id){
         <tbody>
     `;
 
-    maint.forEach(m=>{
-      html += `
-        <tr>
-          <td>${m.date||""}</td>
-          <td>${m.realDate||""}</td>
-          <td>${m.km||""}</td>
-          <td>${m.type||""}</td>
-         <td class="hist-notas" data-texto="${(m.notes||'').replace(/"/g,'&quot;')}">
-  <span style="color:blue;cursor:pointer;margin-left:6px" onclick="editMaint('${m.id}', '${id}')">✏️</span>
-  <span style="color:red;cursor:pointer;margin-left:6px" onclick="delMaint('${m.id}', '${id}')">🗑️</span>
-</td>
+ maint.forEach(m=>{
+  html += `
+    <tr>
+      <td style="text-align:center; line-height:1.2;">
+        ${m.date ? `<div style="font-size:0.9em;">${m.date}</div>` : ''}
+${m.nextKm ? `<div style="font-size:0.85em;">${m.nextKm}km</div>` : ''}
+      </td>
 
-        </tr>`;
-    });
+      <td>${m.realDate || ''}</td>
+      <td>${m.km || ''}</td>
+      <td>${m.type || ''}</td>
+
+      <td class="hist-notas"
+          data-texto="${(m.notes||'').replace(/"/g,'&quot;')}">
+        <span style="color:blue;cursor:pointer;margin-left:6px"
+              onclick="editMaint('${m.id}', '${id}')">✏️</span>
+        <span style="color:red;cursor:pointer;margin-left:6px"
+              onclick="delMaint('${m.id}', '${id}')">🗑️</span>
+      </td>
+    </tr>
+  `;
+});
+
 
     html += '</tbody></table>';
   }
@@ -986,7 +1005,17 @@ function showMaintForm(vehicleId){
       <div class="input-row">
         <div>
           <label class="label-mini">PRÓXIMO MANTENIMIENTO</label>
-          <input id="m_date" type="date">
+          <input id="m_date" type="date" style="width:130px;">
+ 
+          <label class="label-mini" style="margin-top:6px;">
+            KM PRÓXIMO MANTENIMIENTO
+          </label>
+          <input
+            id="m_nextKm"
+            type="number"
+            placeholder="KM PRÓXIMO"
+            style="width:130px;"
+          >
         </div>
 
         <div>
@@ -994,7 +1023,7 @@ function showMaintForm(vehicleId){
           <input id="m_realDate" type="date">
         </div>
 
-        <input id="m_km" class="small-input" placeholder="KM">
+        <input id="m_km" class="small-input" placeholder="KM REALIZADO">
         <input id="m_type" placeholder="Tipo (aceite, revisión...)">
       </div>
 
@@ -1018,6 +1047,10 @@ function addMaintenance(vehicleId){
     id: uid(),
     vehicleId: vehicleId,
     date: document.getElementById('m_date').value,
+nextKm: document.getElementById('m_nextKm')
+          ? Number(document.getElementById('m_nextKm').value) || ''
+          : '',
+
     km: Number(document.getElementById('m_km').value||0),
     type: document.getElementById('m_type').value,
     nextDate: "",
@@ -1211,7 +1244,10 @@ function printFicha(id){
 
   ${maint.map(m=>`
     <tr>
-      <td>${escapeHtml(m.date||'')}</td>
+      <td style="white-space:pre-line; text-align:center;">
+  ${escapeHtml(m.date||'')}${m.nextKm ? `\n${escapeHtml(String(m.nextKm))} km` : ''}
+</td>
+
       <td>${escapeHtml(m.realDate||'')}</td>
       <td>${escapeHtml(String(m.km||''))}</td>
       <td>${escapeHtml(m.type||'')}</td>
@@ -1274,9 +1310,13 @@ function editMaint(mid, vid){
 
     <div class="input-row">
       <div>
-        <label class="label-mini">PRÓXIMO MANTENIMIENTO</label>
-        <input id="em_date_${mid}" type="date" value="${m.date||''}">
-      </div>
+  <label class="label-mini">PRÓXIMO MANTENIMIENTO</label>
+  <input id="em_date_${mid}" type="date" value="${m.date||''}" style="width:130px;">
+
+  <label class="label-mini" style="margin-top:4px;">KM PRÓXIMO</label>
+  <input id="em_nextKm_${mid}" type="number" value="${m.nextKm||''}" style="width:130px;">
+</div>
+
 
       <div>
         <label class="label-mini">FECHA REALIZADO</label>
@@ -1305,6 +1345,10 @@ function saveEditedMaint(mid, vid){
   if(i<0) return;
 
   data.maintenance[i].date = document.getElementById('em_date_'+mid).value;
+data.maintenance[i].nextKm =
+  document.getElementById('em_nextKm_'+mid)
+    ? Number(document.getElementById('em_nextKm_'+mid).value) || ''
+    : '';
   data.maintenance[i].realDate = document.getElementById('em_realDate_'+mid).value;
   data.maintenance[i].km = Number(document.getElementById('em_km_'+mid).value||0);
   data.maintenance[i].type = document.getElementById('em_type_'+mid).value;
@@ -1747,11 +1791,6 @@ function simpleHash(str){
     h |= 0;
   }
   return Math.abs(h).toString(36).toUpperCase();
-}
-</script>
-<script>
-function toggleMenu() {
-  document.body.classList.toggle("menu-open");
 }
 </script>
 
