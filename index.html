@@ -8,28 +8,6 @@
 /* -------------------------
    Estilos generales
    ------------------------- */
-/* Botón hamburguesa */
-#menuToggle {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 9999;
-  font-size: 26px;
-  background: #333;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Solo mostrar en móvil */
-@media (min-width: 769px) {
-  #menuToggle {
-    display: none;
-  }
-}
-
 body{
 
 <!-- resto de tu HTML -->
@@ -407,6 +385,58 @@ th:nth-child(3), td:nth-child(3) { width:90px; }
     right: 4px !important;
   }
 }
+/* ============================= */
+/* MENÚ HAMBURGUESA SOLO MÓVIL   */
+/* ============================= */
+
+@media (max-width: 768px) {
+
+  /* Mostrar botón hamburguesa */
+ #menuToggle {
+  display: block !important;
+}
+
+
+  /* Menú CERRADO por defecto */
+  .sidebar {
+    display: none !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 1000;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.35);
+    overflow-y: auto;
+    padding-top: 10px;
+  }
+
+  /* Menú ABIERTO */
+  body.menu-open .sidebar {
+    display: block !important;
+  }
+
+  /* Evitar que el contenido quede tapado */
+  body.menu-open .main {
+    filter: blur(1px);
+  }
+}
+/* Botón hamburguesa base */
+#menuToggle {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 3000; /* MÁS ALTO QUE TODO */
+  font-size: 22px;
+  padding: 6px 10px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
 
 
@@ -418,10 +448,11 @@ th:nth-child(3), td:nth-child(3) { width:90px; }
 </head>
 <body>
 
-<button id="menuToggle">≡</button>
+<!-- BOTÓN HAMBURGUESA (MÓVIL) -->
+<button id="menuToggle" onclick="toggleMenu()">☰</button>
 
-<!-- resto de tu HTML -->
 <script>
+
 /* =================================================
    FleetMS Simple Portable
    DEMO 30 DÍAS + LICENCIA POR EQUIPO (OFFLINE)
@@ -1819,17 +1850,11 @@ function simpleHash(str){
 }
 </script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  var toggle = document.getElementById("menuToggle");
-  var menu = document.getElementById("sidebar");
-
-  if (!toggle || !menu) return;
-
-  toggle.addEventListener("click", function () {
-    menu.classList.toggle("active");
-  });
-});
+function toggleMenu() {
+  document.body.classList.toggle("menu-open");
+}
 </script>
+
 </body>
 </html>
 
