@@ -1793,6 +1793,18 @@ function simpleHash(str){
   return Math.abs(h).toString(36).toUpperCase();
 }
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var toggle = document.getElementById("menuToggle");
+  var menu = document.getElementById("menu");
 
+  if (!toggle || !menu) return;
+
+  toggle.addEventListener("click", function () {
+    menu.classList.toggle("active");
+  });
+});
+</script>
 </body>
 </html>
+
