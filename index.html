@@ -461,7 +461,6 @@ th:nth-child(3), td:nth-child(3) { width:90px; }
 
 <!-- BOTÓN HAMBURGUESA (MÓVIL) -->
 <button id="menuToggle" onclick="toggleMenu()">☰</button>
-let APP_BOOTING = true;
 
 <script>
 
@@ -621,46 +620,9 @@ function showExpiredScreen(deviceId){
   ⬆ Importar JSON
 </button>
 <button class="nav-btn" onclick="showLegal()">ℹ Acerca de / Licencia</button>
-<button id="cloudBtn"
-        class="nav-btn"
-        onclick="scrollToSection('cloudSection')">
-  ☁ Nube
-</button>
-
-
-
 
   </div>
   <div class="main">
-<!-- ☁ SECCIÓN NUBE (OCULTA POR DEFECTO) -->
-<div class="container" id="cloudSection" style="display:none">
-  <div class="card" style="max-width:700px">
-
-    <h2>☁ Conexión a la nube</h2>
-
-    <p style="font-size:13px">
-      Introduce la URL del conector (Apps Script).
-      Cada dispositivo debe conectarse una vez.
-    </p>
-
-    <label>URL del conector</label>
-    <input
-      id="cloud_url_input"
-      type="text"
-      placeholder="https://script.google.com/macros/s/XXXX/exec"
-      style="width:100%;margin-bottom:10px">
-
-    <div style="margin-top:10px">
-      <button class="btn" onclick="connectCloudFromUI()">Conectar</button>
-      <button class="btn danger" onclick="disconnectCloudFromUI()">Desconectar</button>
-    </div>
-
-    <div id="cloud_status" style="margin-top:12px;font-weight:bold"></div>
-
-  </div>
-</div>
-
-
     <div class="header-bar">
    <div class="header-bar">
   <div>
@@ -679,7 +641,6 @@ function showExpiredScreen(deviceId){
 </div>
 
     </div>
-
 
    <div class="container">
   <div class="card" id="left">
@@ -724,159 +685,23 @@ function showExpiredScreen(deviceId){
 function uid(){return Math.random().toString(36).slice(2,10)}
 
 function saveAll(data){
-
-  // 🔒 BLOQUEO TOTAL: no guardar si está vacío
-  const hasData =
-    (data.vehicles && data.vehicles.length) ||
-    (data.maintenance && data.maintenance.length) ||
-    (data.docs && data.docs.length) ||
-    (data.km_logs && data.km_logs.length);
-
-  if(!hasData){
-    console.log("saveAll bloqueado: datos vacíos");
-    return;
-  }
-
   localStorage.setItem('fleet_data', JSON.stringify(data));
-
   var el = document.getElementById('statusInfo');
   if(el){
     el.textContent = 'Último guardado: ' + new Date().toLocaleString();
   }
-
-  sendDataToCloud(data);
 }
-
-/* ===== CARGA DESDE NUBE (PASO 5) ===== */
-
-async function loadDataFromCloud(){
-  if(!isCloudEnabled()) return false;
-
-  const cfg = getCloudConfig();
-  if(!cfg || !cfg.scriptUrl) return false;
-
-  try {
-    const r = await fetch(cfg.scriptUrl + "?action=loadAll");
-    if(!r.ok) return false;
-
-    const data = await r.json();
-    if(!data || data.ok !== true || !data.payload) return false;
-
-    const p = data.payload;
-
-    // 🔒 PROTECCIÓN CRÍTICA
-    const hasData =
-      (p.vehicles && p.vehicles.length) ||
-      (p.maintenance && p.maintenance.length) ||
-      (p.docs && p.docs.length) ||
-      (p.km_logs && p.km_logs.length);
-
-    if(!hasData){
-      console.log("Nube vacía → no se sobrescribe local");
-      return false;
-    }
-
-    // ✅ SOLO AQUÍ se guarda en local
-    localStorage.setItem('fleet_data', JSON.stringify(p));
-    console.log("Datos cargados desde la nube");
-    return true;
-
-  } catch(err){
-    console.warn("No se pudo cargar desde la nube", err);
-    return false;
-  }
-}
-
 
 function loadAll(){
   let data = JSON.parse(localStorage.getItem('fleet_data')||'{"vehicles":[],"maintenance":[],"docs":[]}');
   if(!data.km_logs) data.km_logs = [];
   return data;
 }
-/* ===== CONFIGURACIÓN DE NUBE (PASO 1) ===== */
-
-const CLOUD_KEY = "fleetms_cloud_config";
-
-function getCloudConfig(){
-  try {
-    return JSON.parse(localStorage.getItem(CLOUD_KEY));
-  } catch(e){
-    return null;
-  }
-}
-
-function setCloudConfig(cfg){
-  localStorage.setItem(CLOUD_KEY, JSON.stringify(cfg));
-}
-
-function clearCloudConfig(){
-  localStorage.removeItem(CLOUD_KEY);
-}
-
-function isCloudEnabled(){
-  const cfg = getCloudConfig();
-  return !!(cfg && cfg.enabled && cfg.scriptUrl);
-}
-/* ===== CONEXIÓN A NUBE (PASO 2) ===== */
-
-function connectCloud(scriptUrl){
-  if(!scriptUrl) return false;
-
-  setCloudConfig({
-    enabled: true,
-    scriptUrl: scriptUrl
-  });
-
-  return true;
-}
-
-function disconnectCloud(){
-  clearCloudConfig();
-}
-
-/* ===== ENVÍO A NUBE (PASO 3) ===== */
-
-function sendDataToCloud(data){
-  if(!isCloudEnabled()) return;
-
-  const cfg = getCloudConfig();
-  if(!cfg || !cfg.scriptUrl) return;
-
-  fetch(cfg.scriptUrl + "?action=saveAll", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  }).catch(err=>{
-    console.warn("No se pudo enviar a la nube", err);
-  });
-}
-
 
 function scrollToSection(id){
-  const el = document.getElementById(id);
-  if(!el) return;
-
-  // --- TOGGLE NUBE ---
-  if(id === 'cloudSection'){
-    const isVisible = el.style.display !== 'none';
-
-    if(isVisible){
-      el.style.display = 'none';
-      return; // 👈 se oculta y no hace scroll
-    } else {
-      el.style.display = 'block';
-      updateCloudStatus();
-    }
-  } else {
-    // ocultar nube si vamos a otra sección
-    const cloud = document.getElementById('cloudSection');
-    if(cloud) cloud.style.display = 'none';
-  }
-
-  el.scrollIntoView({ behavior:'smooth', block:'start' });
+  var el = document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
 }
-
-
 
 // ---- Formularios de vehículo ----
 function showAddForm(vehicle){
@@ -1704,8 +1529,7 @@ document.addEventListener('keydown', function(e){
 });
 
 /* ---- Inicio de la app ---- */
-loadDataFromCloud().then(renderTable);
-
+renderTable();
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -2050,105 +1874,6 @@ function toggleMenu() {
   document.body.classList.toggle("menu-open");
 }
 </script>
-<script>
-  // TODAS tus funciones existentes
-  // NO BORRAS NADA
-
-  function connectCloudFromUI(){
-    const url = document.getElementById("cloud_url_input").value.trim();
-    if(!url){
-      alert("Introduce la URL del conector");
-      return;
-    }
-    connectCloud(url);
-    updateCloudStatus();
-  }
-
-  function disconnectCloudFromUI(){
-    disconnectCloud();
-    updateCloudStatus();
-  }
-
-  function updateCloudStatus(){
-  const el = document.getElementById("cloud_status");
-  const input = document.getElementById("cloud_url_input");
-  const btn = document.getElementById("cloudBtn");
-
-  if(isCloudEnabled()){
-    const cfg = getCloudConfig();
-
-    if(el){
-      el.innerHTML =
-        "🟢 Conectado<br><small>"+cfg.scriptUrl+"</small>";
-    }
-
-    if(input) input.value = cfg.scriptUrl;
-
-    if(btn){
-      btn.innerHTML = "🟢 ☁ Nube";
-    }
-
-  } else {
-
-    if(el){
-      el.innerHTML = "🔴 No conectado";
-    }
-
-    if(input) input.value = "";
-
-    if(btn){
-      btn.innerHTML = "🔴 ☁ Nube";
-    }
-  }
-}
-
-// ===== CARGA SEGURA DESDE LA NUBE =====
-async function loadFromCloudIfEnabled(){
-  if(!isCloudEnabled()) return;
-
-  const cfg = getCloudConfig();
-  if(!cfg || !cfg.scriptUrl) return;
-
-  try{
-    const r = await fetch(cfg.scriptUrl + "?action=loadAll");
-    if(!r.ok) return;
-
-    const json = await r.json();
-    if(!json.ok || !json.payload) return;
-
-    const p = json.payload;
-
-    // 🔒 SOLO si hay datos reales
-    const hasData =
-      (p.vehicles && p.vehicles.length) ||
-      (p.maintenance && p.maintenance.length) ||
-      (p.docs && p.docs.length) ||
-      (p.km_logs && p.km_logs.length);
-
-    if(!hasData){
-      console.log("Nube vacía → no se sobrescribe local");
-      return;
-    }
-
-    localStorage.setItem("fleet_data", JSON.stringify(p));
-    console.log("Datos cargados desde la nube");
-    renderTable();
-
-  } catch(e){
-    console.warn("Error cargando desde la nube", e);
-  }
-}
-document.addEventListener("DOMContentLoaded", ()=>{
-  updateCloudStatus();
-  loadFromCloudIfEnabled();
-});
-
-
-</script>
-
-<div id="legalText" style="display:none">
-  ...
-</div>
 
 </body>
 </html>
