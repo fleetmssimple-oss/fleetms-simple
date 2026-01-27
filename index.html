@@ -461,6 +461,7 @@ th:nth-child(3), td:nth-child(3) { width:90px; }
 
 <!-- BOTÓN HAMBURGUESA (MÓVIL) -->
 <button id="menuToggle" onclick="toggleMenu()">☰</button>
+let APP_BOOTING = true;
 
 <script>
 
@@ -723,14 +724,29 @@ function showExpiredScreen(deviceId){
 function uid(){return Math.random().toString(36).slice(2,10)}
 
 function saveAll(data){
+
+  // 🔒 BLOQUEO TOTAL: no guardar si está vacío
+  const hasData =
+    (data.vehicles && data.vehicles.length) ||
+    (data.maintenance && data.maintenance.length) ||
+    (data.docs && data.docs.length) ||
+    (data.km_logs && data.km_logs.length);
+
+  if(!hasData){
+    console.log("saveAll bloqueado: datos vacíos");
+    return;
+  }
+
   localStorage.setItem('fleet_data', JSON.stringify(data));
+
   var el = document.getElementById('statusInfo');
   if(el){
     el.textContent = 'Último guardado: ' + new Date().toLocaleString();
   }
-// 🌐 enviar a la nube (si está activada)
+
   sendDataToCloud(data);
 }
+
 /* ===== CARGA DESDE NUBE (PASO 5) ===== */
 
 async function loadDataFromCloud(){
@@ -744,12 +760,27 @@ async function loadDataFromCloud(){
     if(!r.ok) return false;
 
     const data = await r.json();
-    if(!data || data.ok !== true) return false;
+    if(!data || data.ok !== true || !data.payload) return false;
 
-    // Guardamos en local como si viniera de la app
-    localStorage.setItem('fleet_data', JSON.stringify(data.payload));
+    const p = data.payload;
 
+    // 🔒 PROTECCIÓN CRÍTICA
+    const hasData =
+      (p.vehicles && p.vehicles.length) ||
+      (p.maintenance && p.maintenance.length) ||
+      (p.docs && p.docs.length) ||
+      (p.km_logs && p.km_logs.length);
+
+    if(!hasData){
+      console.log("Nube vacía → no se sobrescribe local");
+      return false;
+    }
+
+    // ✅ SOLO AQUÍ se guarda en local
+    localStorage.setItem('fleet_data', JSON.stringify(p));
+    console.log("Datos cargados desde la nube");
     return true;
+
   } catch(err){
     console.warn("No se pudo cargar desde la nube", err);
     return false;
@@ -2071,10 +2102,48 @@ function toggleMenu() {
   }
 }
 
+// ===== CARGA SEGURA DESDE LA NUBE =====
+async function loadFromCloudIfEnabled(){
+  if(!isCloudEnabled()) return;
 
-  document.addEventListener("DOMContentLoaded", ()=>{
-    updateCloudStatus();
-  });
+  const cfg = getCloudConfig();
+  if(!cfg || !cfg.scriptUrl) return;
+
+  try{
+    const r = await fetch(cfg.scriptUrl + "?action=loadAll");
+    if(!r.ok) return;
+
+    const json = await r.json();
+    if(!json.ok || !json.payload) return;
+
+    const p = json.payload;
+
+    // 🔒 SOLO si hay datos reales
+    const hasData =
+      (p.vehicles && p.vehicles.length) ||
+      (p.maintenance && p.maintenance.length) ||
+      (p.docs && p.docs.length) ||
+      (p.km_logs && p.km_logs.length);
+
+    if(!hasData){
+      console.log("Nube vacía → no se sobrescribe local");
+      return;
+    }
+
+    localStorage.setItem("fleet_data", JSON.stringify(p));
+    console.log("Datos cargados desde la nube");
+    renderTable();
+
+  } catch(e){
+    console.warn("Error cargando desde la nube", e);
+  }
+}
+document.addEventListener("DOMContentLoaded", ()=>{
+  updateCloudStatus();
+  loadFromCloudIfEnabled();
+});
+
+
 </script>
 
 <div id="legalText" style="display:none">
