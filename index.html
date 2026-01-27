@@ -385,6 +385,17 @@ th:nth-child(3), td:nth-child(3) { width:90px; }
     right: 4px !important;
   }
 }
+   @media print {
+  body {
+    background: white !important;
+  }
+
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
 /* ============================= */
 /* MENÚ HAMBURGUESA SOLO MÓVIL   */
 /* ============================= */
@@ -1866,6 +1877,7 @@ function toggleMenu() {
 
 </body>
 </html>
+
 
 
 
