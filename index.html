@@ -690,13 +690,98 @@ function saveAll(data){
   if(el){
     el.textContent = 'Último guardado: ' + new Date().toLocaleString();
   }
+// 🌐 enviar a la nube (si está activada)
+  sendDataToCloud(data);
 }
+/* ===== CARGA DESDE NUBE (PASO 5) ===== */
+
+async function loadDataFromCloud(){
+  if(!isCloudEnabled()) return false;
+
+  const cfg = getCloudConfig();
+  if(!cfg || !cfg.scriptUrl) return false;
+
+  try {
+    const r = await fetch(cfg.scriptUrl + "?action=loadAll");
+    if(!r.ok) return false;
+
+    const data = await r.json();
+    if(!data || data.ok !== true) return false;
+
+    // Guardamos en local como si viniera de la app
+    localStorage.setItem('fleet_data', JSON.stringify(data.payload));
+
+    return true;
+  } catch(err){
+    console.warn("No se pudo cargar desde la nube", err);
+    return false;
+  }
+}
+
 
 function loadAll(){
   let data = JSON.parse(localStorage.getItem('fleet_data')||'{"vehicles":[],"maintenance":[],"docs":[]}');
   if(!data.km_logs) data.km_logs = [];
   return data;
 }
+/* ===== CONFIGURACIÓN DE NUBE (PASO 1) ===== */
+
+const CLOUD_KEY = "fleetms_cloud_config";
+
+function getCloudConfig(){
+  try {
+    return JSON.parse(localStorage.getItem(CLOUD_KEY));
+  } catch(e){
+    return null;
+  }
+}
+
+function setCloudConfig(cfg){
+  localStorage.setItem(CLOUD_KEY, JSON.stringify(cfg));
+}
+
+function clearCloudConfig(){
+  localStorage.removeItem(CLOUD_KEY);
+}
+
+function isCloudEnabled(){
+  const cfg = getCloudConfig();
+  return !!(cfg && cfg.enabled && cfg.scriptUrl);
+}
+/* ===== CONEXIÓN A NUBE (PASO 2) ===== */
+
+function connectCloud(scriptUrl){
+  if(!scriptUrl) return false;
+
+  setCloudConfig({
+    enabled: true,
+    scriptUrl: scriptUrl
+  });
+
+  return true;
+}
+
+function disconnectCloud(){
+  clearCloudConfig();
+}
+
+/* ===== ENVÍO A NUBE (PASO 3) ===== */
+
+function sendDataToCloud(data){
+  if(!isCloudEnabled()) return;
+
+  const cfg = getCloudConfig();
+  if(!cfg || !cfg.scriptUrl) return;
+
+  fetch(cfg.scriptUrl + "?action=saveAll", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  }).catch(err=>{
+    console.warn("No se pudo enviar a la nube", err);
+  });
+}
+
 
 function scrollToSection(id){
   var el = document.getElementById(id);
@@ -1529,7 +1614,8 @@ document.addEventListener('keydown', function(e){
 });
 
 /* ---- Inicio de la app ---- */
-renderTable();
+loadDataFromCloud().then(renderTable);
+
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
