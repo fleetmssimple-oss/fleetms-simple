@@ -620,6 +620,7 @@ function showExpiredScreen(deviceId){
   ⬆ Importar JSON
 </button>
 <button class="nav-btn" onclick="showLegal()">ℹ Acerca de / Licencia</button>
+<button class="nav-btn" onclick="openPrivacyPanel()">🛡️ Protección de datos</button>
 
   </div>
   <div class="main">
@@ -1874,9 +1875,81 @@ function toggleMenu() {
   document.body.classList.toggle("menu-open");
 }
 </script>
+<!-- ================================= -->
+<!-- PROTECCIÓN DE DATOS Y CONTACTO -->
+<!-- ================================= -->
+
+<div id="privacy-panel" style="
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:9999;
+">
+
+  <div style="
+    background:#fff;
+    max-width:900px;
+    margin:40px auto;
+    padding:20px;
+    max-height:85%;
+    overflow-y:auto;
+  ">
+    <h2>Protección de datos y contacto</h2>
+
+    <h3>Política de privacidad</h3>
+    <p>
+      FleetMS Simple Portable es una aplicación que funciona de forma totalmente
+      local en el navegador del usuario.
+    </p>
+    <p>
+      La aplicación no recopila, almacena ni transmite datos personales a
+      servidores externos. Toda la información introducida por el usuario se
+      guarda exclusivamente en el almacenamiento local del navegador
+      (localStorage).
+    </p>
+    <p>
+      FleetMS Simple Portable no utiliza cookies, no realiza seguimiento de
+      usuarios ni comparte información con terceros.
+    </p>
+    <p>
+      El usuario es el único responsable de los datos que introduce y gestiona
+      dentro de la aplicación.
+    </p>
+
+    <h3>Contacto</h3>
+    <p>
+      Para cualquier consulta o soporte relacionado con la aplicación, puede
+      contactar a través del siguiente correo electrónico:
+    </p>
+    <p>
+      <strong>fleetms.simple@gmail.com</strong>
+    </p>
+
+    <p style="margin-top:20px; font-size:0.9em; color:#666;">
+      Última actualización: febrero de 2026
+    </p>
+
+    <button onclick="closePrivacyPanel()">Cerrar</button>
+  </div>
+</div>
+
+<script>
+  function openPrivacyPanel() {
+    document.getElementById('privacy-panel').style.display = 'block';
+  }
+
+  function closePrivacyPanel() {
+    document.getElementById('privacy-panel').style.display = 'none';
+  }
+</script>
 
 </body>
 </html>
+
 
 
 
