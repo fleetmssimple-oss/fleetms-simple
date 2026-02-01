@@ -619,8 +619,10 @@ function showExpiredScreen(deviceId){
     <button class="nav-btn" onclick="handleImportClick()">
   ⬆ Importar JSON
 </button>
-<button class="nav-btn" onclick="showLegal()">ℹ Acerca de / Licencia</button>
+<button class="nav-btn" onclick="showLegal()">ℹ️ Acerca de / Licencia</button>
+
 <button class="nav-btn" onclick="openPrivacyPanel()">🛡️ Protección de datos</button>
+
 
   </div>
   <div class="main">
@@ -1703,9 +1705,14 @@ de propiedad intelectual.
 </p>
 </div>
 <script>
-function showLegal(){
+<script>
+function showLegal() {
+
+  // Evita duplicados
+  if (document.getElementById("legalOverlay")) return;
 
   const overlay = document.createElement("div");
+  overlay.id = "legalOverlay";
   overlay.style.position = "fixed";
   overlay.style.top = "0";
   overlay.style.left = "0";
@@ -1724,15 +1731,23 @@ function showLegal(){
   box.style.overflow = "auto";
   box.style.padding = "20px";
   box.style.borderRadius = "6px";
-  box.innerHTML = document.getElementById("legalText").innerHTML +
+
+  box.innerHTML =
+    document.getElementById("legalText").innerHTML +
     '<div style="text-align:right;margin-top:10px">' +
-    '<button onclick="this.closest(`div`).parentElement.remove()">Cerrar</button>' +
+    '<button onclick="closeLegal()">Cerrar</button>' +
     '</div>';
 
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 }
+
+function closeLegal() {
+  const overlay = document.getElementById("legalOverlay");
+  if (overlay) overlay.remove();
+}
 </script>
+
 <script>
 /* ===============================
    MOTOR DE IDIOMAS – FleetMS
@@ -1875,6 +1890,7 @@ function toggleMenu() {
   document.body.classList.toggle("menu-open");
 }
 </script>
+
 <!-- ================================= -->
 <!-- PROTECCIÓN DE DATOS Y CONTACTO -->
 <!-- ================================= -->
@@ -1946,11 +1962,52 @@ function toggleMenu() {
     document.getElementById('privacy-panel').style.display = 'none';
   }
 </script>
+<script>
+  // ===== MODAL LEGAL =====
+  function showLegal() {
+
+    // Evitar duplicados
+    if (document.getElementById("legalOverlay")) return;
+
+    const overlay = document.createElement("div");
+    overlay.id = "legalOverlay";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100vw";
+    overlay.style.height = "100vh";
+    overlay.style.background = "rgba(0,0,0,0.6)";
+    overlay.style.zIndex = "99999";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+
+    const box = document.createElement("div");
+    box.style.background = "#fff";
+    box.style.maxWidth = "700px";
+    box.style.maxHeight = "80vh";
+    box.style.overflow = "auto";
+    box.style.padding = "20px";
+    box.style.borderRadius = "6px";
+
+    box.innerHTML =
+      document.getElementById("legalText").innerHTML +
+      '<div style="text-align:right;margin-top:10px">' +
+      '<button onclick="closeLegal()">Cerrar</button>' +
+      '</div>';
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  }
+
+  function closeLegal() {
+    const overlay = document.getElementById("legalOverlay");
+    if (overlay) overlay.remove();
+  }
+</script>
 
 </body>
 </html>
-
-
 
 
 
