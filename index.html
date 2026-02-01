@@ -621,7 +621,8 @@ function showExpiredScreen(deviceId){
 </button>
 <button class="nav-btn" onclick="showLegal()">ℹ️ Acerca de / Licencia</button>
 
-<button class="nav-btn" onclick="openPrivacyPanel()">🛡️ Protección de datos</button>
+<button class="nav-btn" onclick="showPrivacy()">🛡️ Protección de datos</button>
+
 
 
   </div>
@@ -1914,54 +1915,41 @@ function toggleMenu() {
     max-height:85%;
     overflow-y:auto;
   ">
-    <h2>Protección de datos y contacto</h2>
+  <div id="privacyText" style="display:none">
+  <h2>Protección de datos y contacto</h2>
 
-    <h3>Política de privacidad</h3>
-    <p>
-      FleetMS Simple Portable es una aplicación que funciona de forma totalmente
-      local en el navegador del usuario.
-    </p>
-    <p>
-      La aplicación no recopila, almacena ni transmite datos personales a
-      servidores externos. Toda la información introducida por el usuario se
-      guarda exclusivamente en el almacenamiento local del navegador
-      (localStorage).
-    </p>
-    <p>
-      FleetMS Simple Portable no utiliza cookies, no realiza seguimiento de
-      usuarios ni comparte información con terceros.
-    </p>
-    <p>
-      El usuario es el único responsable de los datos que introduce y gestiona
-      dentro de la aplicación.
-    </p>
+  <h3>Política de privacidad</h3>
+  <p>
+    FleetMS Simple Portable es una aplicación que funciona de forma totalmente
+    local en el navegador del usuario.
+  </p>
+  <p>
+    La aplicación no recopila, almacena ni transmite datos personales a
+    servidores externos. Toda la información introducida por el usuario se
+    guarda exclusivamente en el almacenamiento local del navegador
+    (localStorage).
+  </p>
+  <p>
+    FleetMS Simple Portable no utiliza cookies, no realiza seguimiento de
+    usuarios ni comparte información con terceros.
+  </p>
+  <p>
+    El usuario es el único responsable de los datos que introduce y gestiona
+    dentro de la aplicación.
+  </p>
 
-    <h3>Contacto</h3>
-    <p>
-      Para cualquier consulta o soporte relacionado con la aplicación, puede
-      contactar a través del siguiente correo electrónico:
-    </p>
-    <p>
-      <strong>fleetmssimple@gmail.com</strong>
-    </p>
+  <h3>Contacto</h3>
+  <p>
+    Para cualquier consulta o soporte relacionado con la aplicación, puede
+    contactar a través del siguiente correo electrónico:
+  </p>
+  <p><strong>fleetmssimple@gmail.com</strong></p>
 
-    <p style="margin-top:20px; font-size:0.9em; color:#666;">
-      Última actualización: febrero de 2026
-    </p>
-
-    <button onclick="closePrivacyPanel()">Cerrar</button>
-  </div>
+  <p style="margin-top:20px; font-size:0.9em; color:#666;">
+    Última actualización: febrero de 2026
+  </p>
 </div>
 
-<script>
-  function openPrivacyPanel() {
-    document.getElementById('privacy-panel').style.display = 'block';
-  }
-
-  function closePrivacyPanel() {
-    document.getElementById('privacy-panel').style.display = 'none';
-  }
-</script>
 <script>
   // ===== MODAL LEGAL =====
   function showLegal() {
@@ -2004,6 +1992,43 @@ function toggleMenu() {
     const overlay = document.getElementById("legalOverlay");
     if (overlay) overlay.remove();
   }
+</script>
+<script>
+function showPrivacy() {
+
+  // Evitar duplicados
+  if (document.getElementById("legalOverlay")) return;
+
+  const overlay = document.createElement("div");
+  overlay.id = "legalOverlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.background = "rgba(0,0,0,0.6)";
+  overlay.style.zIndex = "99999";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+
+  const box = document.createElement("div");
+  box.style.background = "white";
+  box.style.maxWidth = "700px";
+  box.style.maxHeight = "80vh";
+  box.style.overflow = "auto";
+  box.style.padding = "20px";
+  box.style.borderRadius = "6px";
+
+  box.innerHTML =
+    document.getElementById("privacyText").innerHTML +
+    '<div style="text-align:right;margin-top:10px">' +
+    '<button onclick="closeLegal()">Cerrar</button>' +
+    '</div>';
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
 </script>
 
 </body>
