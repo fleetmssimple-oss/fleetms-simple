@@ -1,0 +1,2065 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CONTROL Y MANTENIMIENTO DE VEHÍCULOS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* -------------------------
+   Estilos generales
+   ------------------------- */
+body{
+
+<!-- resto de tu HTML -->
+  font-family:Arial,Helvetica,sans-serif;
+  margin:0;
+  color:#222;
+  background:#f5f5f5;
+}
+h1,h2{margin:6px 0}
+input,select,button,textarea{
+  padding:6px;
+  margin:4px 2px;
+  border:1px solid #bbb;
+  border-radius:4px;
+  font-family:inherit;
+  font-size:14px;
+}
+.app{
+  display:flex;
+  min-height:100vh;
+}
+.sidebar{
+  width:190px;
+  background:#ffffff;
+  border-right:1px solid #ddd;
+  padding:10px;
+  box-shadow:0 0 4px rgba(0,0,0,0.05);
+  position:sticky;
+  top:0;
+  align-self:flex-start;
+}
+.sidebar h2{
+  font-size:16px;
+  margin:4px 0 10px 0;
+}
+.nav-btn{
+  display:block;
+  width:100%;
+  text-align:left;
+  padding:6px 8px;
+  margin:3px 0;
+  border:1px solid #ddd;
+  border-radius:4px;
+  background:#fafafa;
+  cursor:pointer;
+  font-size:13px;
+}
+.nav-btn:hover{
+  background:#f0f0f0;
+}
+.main{
+  flex:1;
+  padding:12px;
+}
+.header-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  margin-bottom:8px;
+}
+.header-bar small{
+  color:#666;
+}
+.container{
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:12px;
+}
+.card{
+  background:#fff;
+  border:1px solid #ddd;
+  padding:10px;
+  border-radius:6px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.03);
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+}
+th,td{
+  border-bottom:1px solid #eee;
+  padding:8px;
+  font-size:14px;
+  text-align:left;
+}
+.small{font-size:12px;color:#666}
+.btn{
+  background:#1976d2;
+  color:white;
+  border:none;
+  padding:8px 10px;
+  border-radius:4px;
+  cursor:pointer;
+  font-size:13px;
+}
+.btn.alt{background:#4caf50}
+.btn.warn{background:#ff9800}
+.btn.danger{background:#e53935}
+.filterrow{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-bottom:8px;
+}
+.alert{
+  background:#fffbe6;
+  border:1px solid #ffe8a1;
+  padding:8px;
+  border-radius:4px;
+  margin:4px 0;
+  font-size:13px;
+}
+.alert.overdue{
+  background:#ffebee;
+  border-color:#ffcdd2;
+}
+.link{color:#1976d2;text-decoration:underline}
+.input-row{display:flex;gap:8px;flex-wrap:wrap}
+.small-input{width:120px}
+.nodata{color:#888;padding:12px;font-size:13px}
+.badge{
+  display:inline-block;
+  background:#ff5252;
+  color:white;
+  padding:2px 6px;
+  border-radius:12px;
+  font-size:11px;
+  margin-left:4px;
+}
+.badge.soft{
+  background:#ffa000;
+}
+
+/* etiqueta pequeña encima de cajas de fecha */
+.label-mini {
+    font-size:6px;
+    font-weight:700;
+    margin-bottom:3px;
+    display:block;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+    color:#333;
+}
+
+/* columnas tabla principal */
+th:nth-child(1), td:nth-child(1) { width:130px; }
+th:nth-child(2), td:nth-child(2) { width:130px; }
+th:nth-child(3), td:nth-child(3) { width:90px; }
+
+@media (max-width:900px){
+  .container{
+    grid-template-columns:1fr;
+  }
+  .sidebar{
+    display:none;
+  }
+  body{
+    margin:8px;
+  }
+}
+
+/* --- NUEVO: historial en UNA sola línea en pantalla --- */
+@media screen {
+  #quickView table tbody tr td.hist-notas{
+    max-width:260px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  #quickView table tbody tr td.hist-notas span{
+    display:inline-block;
+    white-space:nowrap;
+    overflow:visible;
+    margin-left:6px;
+  }
+}
+
+/* Modo impresión: solo se ve printReport */
+@media print {
+  body * { visibility: hidden !important; }
+  #printReport, #printReport * { visibility: visible !important; }
+  #printReport {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: white;
+    z-index: 9999;
+  }
+
+/* === TABLAS DE IMPRESIÓN DE 18 CM CENTRADAS === */
+#printReport .table-wrapper {
+  width: 18cm !important;
+  margin: 0 auto !important; 
+  display: block !important;
+}
+
+#printReport table {
+  width: 18cm !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+  border: 1px solid #000 !important;
+}
+
+#printReport th,
+#printReport td {
+  border: 1px solid #000 !important;
+  padding: 6px 8px !important;
+  background: #fff !important;
+}
+
+/* ==== TABLA DE HISTORIAL ==== */
+
+#printReport table.history-table th:nth-child(1),
+#printReport table.history-table td:nth-child(1) { width: 70px !important; }
+
+#printReport table.history-table th:nth-child(2),
+#printReport table.history-table td:nth-child(2) { width: 70px !important; }
+
+#printReport table.history-table th:nth-child(3),
+#printReport table.history-table td:nth-child(3) {
+  width: 50px !important;
+  text-align:right !important;
+}
+
+#printReport table.history-table th:nth-child(4),
+#printReport table.history-table td:nth-child(4) { width: 90px !important; }
+
+#printReport table.history-table th:nth-child(5),
+#printReport table.history-table td:nth-child(5) {
+  width: 180px !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+
+/* ==== TABLA DE KM ==== */
+
+#printReport table.km-table th:nth-child(1),
+#printReport table.km-table td:nth-child(1),
+#printReport table.km-table th:nth-child(2),
+#printReport table.km-table td:nth-child(2) {
+  width: auto !important;
+  white-space: nowrap !important;
+}
+
+#printReport table.km-table td:nth-child(2) {
+  text-align:right !important;
+}
+
+#printReport table.km-table th:nth-child(3),
+#printReport table.km-table td:nth-child(3) {
+  width: 100% !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+/* === Tabla KM con distribución automática === */
+#printReport table.km-table {
+  table-layout: auto !important; /* permite que Fecha y KM se vean */
+  width: 18cm !important; 
+}
+
+/* Fecha y KM se adaptan */
+#printReport table.km-table th:nth-child(1),
+#printReport table.km-table td:nth-child(1) {
+  width: 1% !important;
+  white-space: nowrap !important;
+}
+
+#printReport table.km-table th:nth-child(2),
+#printReport table.km-table td:nth-child(2) {
+  width: 1% !important;
+  white-space: nowrap !important;
+  text-align: right !important;
+}
+
+/* Notas es la que ocupa todo el espacio restante */
+#printReport table.km-table th:nth-child(3),
+#printReport table.km-table td:nth-child(3) {
+  width: auto !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+
+
+
+  /* Reforzar salto de línea */
+  p, td { white-space: pre-wrap !important; }
+
+  /* Mantener borde derecho */
+  td:last-child, th:last-child { border-right: 1px solid #000 !important; }
+
+  /* Notas: ancho fijo solo al imprimir y crecer vertical */
+  .cell-notas {
+    width: 300px !important;       /* ancho fijo en impresión */
+    max-width: 300px !important;
+    white-space: pre-wrap !important;  /* respeta saltos de línea */
+    vertical-align: top !important;
+  }
+
+  /* Asegurar que las celdas con notas no colapsen lateralmente */
+  td.cell-notas { word-break: break-word !important; }
+
+  /* Forzar que el contenido imprimible utilice tamaño legible */
+  #printReport { font-size:12px; line-height:1.25; }
+}
+/* === Pantalla: historial aún más reducido (dos puntos menos) === */
+@media screen {
+
+  /* Letra muy pequeña y tabla compacta */
+  #quickView table {
+    font-size: 7px !important;       /* ANTES 9px → AHORA 7px */
+  }
+
+  #quickView th,
+  #quickView td {
+    padding: 1px 2px !important;     /* celdas ultracompactas */
+  }
+
+  /* Columnas ajustadas proporcionalmente */
+  #quickView th:nth-child(1),
+  #quickView td:nth-child(1) {
+    width: 55px !important;          /* Fecha próximo */
+  }
+
+  #quickView th:nth-child(2),
+  #quickView td:nth-child(2) {
+    width: 55px !important;          /* Fecha realizado */
+  }
+
+  #quickView th:nth-child(3),
+  #quickView td:nth-child(3) {
+    width: 35px !important;          /* KM */
+    text-align: right !important;
+  }
+
+  #quickView th:nth-child(4),
+  #quickView td:nth-child(4) {
+    width: 50px !important;          /* Tipo */
+  }
+
+  /* NOTAS: super estrecha pero funcional */
+  #quickView td.hist-notas {
+    width: 0.7cm !important;
+    max-width: 0.7cm !important;
+    min-width: 0.7cm !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+
+    position: relative;
+    padding-right: 50px !important;   /* espacio iconos */
+  }
+
+  /* Iconos siempre visibles */
+  #quickView td.hist-notas span {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    padding: 0 2px;
+    font-size: 10px !important;
+  }
+
+  /* Editar */
+  #quickView td.hist-notas span:first-of-type {
+    right: 24px !important;
+  }
+
+  /* Borrar */
+  #quickView td.hist-notas span:last-of-type {
+    right: 4px !important;
+  }
+}
+   @media print {
+  body {
+    background: white !important;
+  }
+
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ============================= */
+/* MENÚ HAMBURGUESA SOLO MÓVIL   */
+/* ============================= */
+
+@media (max-width: 768px) {
+
+  /* Mostrar botón hamburguesa */
+ #menuToggle {
+  display: block !important;
+}
+
+
+  /* Menú CERRADO por defecto */
+  .sidebar {
+    display: none !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 1000;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.35);
+    overflow-y: auto;
+    padding-top: 10px;
+  }
+
+  /* Menú ABIERTO */
+  body.menu-open .sidebar {
+    display: block !important;
+  }
+
+  /* Evitar que el contenido quede tapado */
+  body.menu-open .main {
+    filter: blur(1px);
+  }
+}
+/* Botón hamburguesa base */
+#menuToggle {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 3000; /* MÁS ALTO QUE TODO */
+  font-size: 22px;
+  padding: 6px 10px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
+
+</style>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+
+</head>
+<body>
+
+<!-- BOTÓN HAMBURGUESA (MÓVIL) -->
+<button id="menuToggle" onclick="toggleMenu()">☰</button>
+
+<script>
+
+/* =================================================
+   FleetMS Simple Portable
+   DEMO 30 DÍAS + LICENCIA POR EQUIPO (OFFLINE)
+   ================================================= */
+
+const DEMO_DAYS = 30;
+
+// ---------- ID DE EQUIPO ----------
+function getDeviceId(){
+  let id = localStorage.getItem("fms_device_id");
+  if(!id){
+    id = "PC-" + Math.random().toString(36).substr(2,8).toUpperCase();
+    localStorage.setItem("fms_device_id", id);
+  }
+  return id;
+}
+
+// ---------- DEMO ----------
+function initDemo(){
+  if(!localStorage.getItem("fms_demo_start")){
+    localStorage.setItem("fms_demo_start", Date.now());
+  }
+}
+
+function demoValid(){
+  const start = localStorage.getItem("fms_demo_start");
+  if(!start) return false;
+  const days =
+    (Date.now() - Number(start)) / (1000*60*60*24);
+  return days <= DEMO_DAYS;
+}
+
+function demoDaysLeft(){
+  const start = localStorage.getItem("fms_demo_start");
+  if(!start) return 0;
+  const used =
+    (Date.now() - Number(start)) / (1000*60*60*24);
+  return Math.max(0, Math.ceil(DEMO_DAYS - used));
+}
+
+// ---------- ESTADO ----------
+function isLicensed(){
+  return localStorage.getItem("fms_activated") === "true";
+}
+
+// ---------- ARRANQUE ----------
+document.addEventListener("DOMContentLoaded", function(){
+
+  const app = document.querySelector(".app");
+  if(app) app.style.display = "none";
+
+  initDemo();
+  const deviceId = getDeviceId();
+
+  // 🔓 LICENCIADO
+  if(isLicensed()){
+    if(app) app.style.display = "flex";
+    return;
+  }
+
+  // 🟢 DEMO ACTIVA
+  if(demoValid()){
+    showDemoBanner(demoDaysLeft());
+    if(app) app.style.display = "flex";
+    return;
+  }
+
+  // 🔒 DEMO CADUCADA
+  showExpiredScreen(deviceId);
+});
+
+// ---------- UI ----------
+function showDemoBanner(days){
+  const banner = document.createElement("div");
+  banner.style.background = "#fff3cd";
+  banner.style.border = "1px solid #ffeeba";
+  banner.style.padding = "8px";
+  banner.style.fontSize = "12px";
+  banner.style.textAlign = "center";
+
+  banner.innerHTML = `
+    <strong>Versión de demostración</strong> – quedan ${days} días
+    &nbsp; | &nbsp;
+    <button id="btnActivateDemo"
+      style="padding:4px 10px;font-size:12px;cursor:pointer">
+      Activar licencia
+    </button>
+  `;
+
+  document.body.insertBefore(banner, document.body.firstChild);
+
+  document.getElementById("btnActivateDemo")
+    .addEventListener("click", showActivationPopup);
+}
+
+function showExpiredScreen(deviceId){
+  document.body.innerHTML = `
+    <div style="
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:Arial;
+      background:#f5f5f5;
+    ">
+      <div style="
+        background:white;
+        padding:24px;
+        border:1px solid #ccc;
+        border-radius:6px;
+        width:380px;
+        text-align:center;
+      ">
+        <h2>Demo finalizada</h2>
+        <p>El periodo de demostración ha finalizado.</p>
+
+        <p><strong>ID del equipo:</strong><br>${deviceId}</p>
+
+        <input id="licenseKey"
+          placeholder="Introduce tu clave"
+          style="width:100%;padding:8px">
+
+        <br><br>
+        <button onclick="activate()">Activar licencia</button>
+        <p id="msg" style="color:red;margin-top:10px"></p>
+      </div>
+    </div>
+  `;
+
+  window.activate = function(){
+    const key = document.getElementById("licenseKey").value.trim();
+    if(VALID_LICENSES[key] === deviceId){
+      localStorage.setItem("fms_activated","true");
+      localStorage.setItem("fms_license",key);
+      location.reload();
+    } else {
+      document.getElementById("msg").innerText =
+        "Licencia no válida para este equipo";
+    }
+  };
+}
+</script>
+
+
+<div class="app">
+  <div class="sidebar">
+    <h2>CONTROL Y MANTENIMIENTO DE VEHÍCULOS</h2>
+    <button class="nav-btn" onclick="scrollToSection('vehiculosSection')">🚚 Vehículos</button>
+    <button class="nav-btn" onclick="scrollToSection('alertasSection')">⚠ Alertas</button>
+    <button class="nav-btn" onclick="scrollToSection('detalleSection')">🛠 Ficha / Historial</button>
+    <button class="nav-btn" onclick="exportData()">💾 Exportar JSON</button>
+    <button class="nav-btn" onclick="downloadBackup()">⬇ Backup rápido</button>
+    <button class="nav-btn" onclick="handleImportClick()">
+  ⬆ Importar JSON
+</button>
+<button class="nav-btn" onclick="showLegal()">ℹ️ Acerca de / Licencia</button>
+
+<button class="nav-btn" onclick="showPrivacy()">🛡️ Protección de datos</button>
+<div style="
+  margin-top:20px;
+  padding-top:10px;
+  border-top:1px solid #ddd;
+  font-size:12px;
+  text-align:center;
+  color:#666;
+">
+ <a onclick="showLegal()">Términos y condiciones</a><br>
+<a onclick="showPrivacy()">Política de privacidad</a><br>
+<a href="mailto:fleetmssimple@gmail.com">Contacto</a>
+
+</div>
+
+
+
+  </div>
+  <div class="main">
+    <div class="header-bar">
+   <div class="header-bar">
+  <div>
+    <h1 id="vehiculosSection">FleetMS Simple Portable</h1>
+
+    <small>
+      Funciona totalmente local en tu navegador.
+      Datos guardados en <strong>localStorage</strong>.
+    </small>
+  </div>
+
+  <div style="text-align:right">
+    <small id="statusInfo"></small><br>
+    <small id="licenseInfo" style="font-size:11px;color:#666;"></small>
+  </div>
+</div>
+
+    </div>
+
+   <div class="container">
+  <div class="card" id="left">
+    <h2>Vehículos <span id="totalCount" class="small"></span></h2>
+
+    <div class="filterrow">
+      <input id="q" placeholder="Buscar matrícula, modelo..." oninput="renderTable()">
+      <select id="filterFuel" onchange="renderTable()">
+        <option value="">Combustible (todos)</option>
+        <option>Gasolina</option>
+        <option>Diésel</option>
+        <option>Híbrido</option>
+        <option>Eléctrico</option>
+      </select>
+      <button class="btn" onclick="showAddForm()">Nuevo vehículo</button>
+    </div>
+
+    <!-- ALERTAS -->
+    <div id="alertasSection" class="small" style="margin-bottom:6px;">
+      <div id="alerts"></div>
+      <div id="maintenanceAlerts" style="margin-top:6px;"></div>
+    </div>
+
+    <div id="tableWrap" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="card" id="right">
+    <h2 id="detalleTitle">Ficha / Edición</h2>
+    <div id="formArea"></div>
+    <hr>
+    <h3 id="detalleSection">Vista rápida del vehículo</h3>
+    <div id="quickView" class="small"></div>
+  </div>
+</div>
+
+
+<input type="file" id="importFile" style="display:none" onchange="importDataFile(event)">
+
+<div id="printReport" class="print-area"></div>
+<script>
+// ---- Utilidades base ----
+function uid(){return Math.random().toString(36).slice(2,10)}
+
+function saveAll(data){
+  localStorage.setItem('fleet_data', JSON.stringify(data));
+  var el = document.getElementById('statusInfo');
+  if(el){
+    el.textContent = 'Último guardado: ' + new Date().toLocaleString();
+  }
+}
+
+function loadAll(){
+  let data = JSON.parse(localStorage.getItem('fleet_data')||'{"vehicles":[],"maintenance":[],"docs":[]}');
+  if(!data.km_logs) data.km_logs = [];
+  return data;
+}
+
+function scrollToSection(id){
+  var el = document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ---- Formularios de vehículo ----
+function showAddForm(vehicle){
+  let v = vehicle || {matricula:'',marca:'',modelo:'',combustible:'',km:'',ubicacion:'',consumo:'',itvDate:'',seguroDate:'',observaciones:''};
+  document.getElementById('formArea').innerHTML = `
+    <div>
+
+      <div class="input-row">
+        <input id="f_matricula" placeholder="Matrícula" value="${v.matricula||''}">
+        <input id="f_marca" placeholder="Marca" value="${v.marca||''}">
+        <input id="f_modelo" placeholder="Modelo" value="${v.modelo||''}">
+      </div>
+
+      <div class="input-row">
+        <select id="f_combustible">
+          <option value="">Combustible</option>
+          <option ${v.combustible=='Gasolina'?'selected':''}>Gasolina</option>
+          <option ${v.combustible=='Diésel'?'selected':''}>Diésel</option>
+          <option ${v.combustible=='Híbrido'?'selected':''}>Híbrido</option>
+          <option ${v.combustible=='Eléctrico'?'selected':''}>Eléctrico</option>
+        </select>
+
+        <input id="f_km" class="small-input" placeholder="KM actuales" value="${v.km||''}">
+        <input id="f_consumo" class="small-input" placeholder="Consumo (l/100 o kWh/100)" value="${v.consumo||''}">
+      </div>
+
+      <div class="input-row">
+        <div>
+          <label class="label-mini">ITV</label>
+          <input id="f_itv" type="date" value="${v.itvDate||''}">
+        </div>
+
+        <div>
+          <label class="label-mini">SEGURO</label>
+          <input id="f_seguro" type="date" value="${v.seguroDate||''}">
+        </div>
+
+        <input id="f_ubicacion" placeholder="Ubicación" value="${v.ubicacion||''}" style="flex:1">
+      </div>
+
+      <div>
+        <label class="label-mini">OBSERVACIONES</label>
+        <textarea id="f_obs" rows="3" style="width:100%; white-space:pre-wrap;">${v.observaciones||''}</textarea>
+      </div>
+
+      <div style="margin-top:8px">
+        <button class="btn alt" onclick="saveVehicle('${v.id||''}')">Guardar</button>
+        <button class="btn" onclick="cancelEdit()">Cancelar</button>
+      </div>
+
+    </div>
+  `;
+  document.getElementById('detalleTitle').innerText = v.id ? 'Editar vehículo' : 'Nueva ficha';
+}
+
+function cancelEdit(){
+  document.getElementById('formArea').innerHTML='';
+  document.getElementById('detalleTitle').innerText='Ficha / Edición';
+}
+
+function saveVehicle(id){
+  let data = loadAll();
+  let v = {
+    id: id || uid(),
+    matricula: document.getElementById('f_matricula').value.trim(),
+    marca: document.getElementById('f_marca').value.trim(),
+    modelo: document.getElementById('f_modelo').value.trim(),
+    combustible: document.getElementById('f_combustible').value,
+    km: Number(document.getElementById('f_km').value||0),
+    ubicacion: document.getElementById('f_ubicacion').value,
+    consumo: document.getElementById('f_consumo').value,
+    itvDate: document.getElementById('f_itv').value,
+    seguroDate: document.getElementById('f_seguro').value,
+    observaciones: document.getElementById('f_obs').value
+  };
+
+  let idx = data.vehicles.findIndex(x=>x.id==v.id);
+  if(idx>=0) data.vehicles[idx]=v; else data.vehicles.push(v);
+
+  saveAll(data);
+  renderTable();
+  cancelEdit();
+}
+
+// ---- Render tabla vehículos + alertas ----
+function renderTable(){
+  let data = loadAll();
+  let q = (document.getElementById('q').value||'').toLowerCase();
+  let filterFuel = document.getElementById('filterFuel').value;
+
+  let rows = data.vehicles.filter(v=>{
+    if(filterFuel && v.combustible!=filterFuel) return false;
+    if(!q) return true;
+    return (v.matricula||'').toLowerCase().includes(q) ||
+           (v.modelo||'').toLowerCase().includes(q) ||
+           (v.marca||'').toLowerCase().includes(q);
+  });
+
+  document.getElementById('totalCount').innerText = `(${rows.length})`;
+  renderAlerts();
+renderMaintenanceAlerts();
+
+
+  if(rows.length==0){
+    document.getElementById('tableWrap').innerHTML = '<div class="nodata">No hay vehículos. Crea uno nuevo.</div>';
+    return;
+  }
+
+  let html = '<table><thead><tr><th>Matrícula</th><th>Modelo</th><th>KM</th><th>ITV</th><th>Seguro</th><th></th></tr></thead><tbody>';
+
+  rows.forEach(v=>{
+    let badges='';
+    if(isDateNear(v.itvDate,30)) badges += '<span class="badge soft">ITV</span>';
+    if(isDateNear(v.seguroDate,30)) badges += '<span class="badge soft">Seguro</span>';
+
+    let upkm = upcomingMaintenanceByKm(v.id);
+    if(upkm) badges += `<span class="badge">Mantenimiento ${upkm} km</span>`;
+
+    html += `<tr>
+      <td>${v.matricula||''}${badges}</td>
+      <td>${v.marca||""} ${v.modelo||""}</td>
+      <td>${v.km||0}</td>
+      <td>${v.itvDate||""}</td>
+      <td>${v.seguroDate||''}</td>
+      <td>
+        <button class="btn" onclick="viewVehicle('${v.id}')">Ver</button>
+        <button class="btn warn" onclick="editVehicle('${v.id}')">Editar</button>
+        <button onclick="delVehicle('${v.id}')" class="btn danger">Borrar</button>
+      </td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('tableWrap').innerHTML = html;
+}
+
+// ---- Auxiliares de alerta ----
+function isDateNear(dateStr, days){
+  if(!dateStr) return false;
+  let d = new Date(dateStr);
+  if(isNaN(d.getTime())) return false;
+  let now = new Date();
+  let diff = (d - now) / (1000*60*60*24);
+  return diff<=days && diff>=-3650;
+}
+
+function upcomingMaintenanceByKm(vehicleId){
+  let data = loadAll();
+  let v = data.vehicles.find(x=>x.id==vehicleId);
+  if(!v) return null;
+
+  let maint = data.maintenance
+    .filter(m=>m.vehicleId==vehicleId && m.km && m.km>v.km)
+    .sort((a,b)=>a.km-b.km);
+
+  if(maint.length==0) return null;
+  let next = maint[0];
+
+  let diff = next.km - v.km;
+  if(diff<=500) return diff;
+
+  return null;
+}
+
+function renderAlerts(){
+  let data = loadAll();
+  let out = '';
+  let now = new Date();
+
+  data.vehicles.forEach(v=>{
+    if(isDateNear(v.itvDate,30)){
+      let overdue = new Date(v.itvDate) < now;
+      out += `<div class="alert ${overdue?'overdue':''}">
+        ITV ${overdue?'CADUCADA':'próxima'}: 
+        <strong>${v.matricula}</strong> - ${v.itvDate}
+      </div>`;
+    }
+
+    if(isDateNear(v.seguroDate,30)){
+      let overdue = new Date(v.seguroDate) < now;
+      out += `<div class="alert ${overdue?'overdue':''}">
+        Seguro ${overdue?'CADUCADO':'próxima renovación'}: 
+        <strong>${v.matricula}</strong> - ${v.seguroDate}
+      </div>`;
+    }
+  });
+
+  document.getElementById('alerts').innerHTML = out || 
+    '<div class="small">Sin alertas próximas (30 días)</div>';
+}
+function renderMaintenanceAlerts(){
+  let data = loadAll();
+  let out = '';
+  let now = new Date();
+
+  data.vehicles.forEach(v=>{
+    data.maintenance
+      .filter(m => m.vehicleId === v.id)
+      .forEach(m => {
+
+        // No hay ni fecha ni km → no alerta
+        if(!m.date && !m.nextKm) return;
+
+        // --- FECHA ---
+        let dateOverdue = false;
+        let dateNear = false;
+
+        if(m.date){
+          let d = new Date(m.date);
+          if(!isNaN(d)){
+            dateOverdue = d < now;
+            dateNear = !dateOverdue && isDateNear(m.date, 30);
+          }
+        }
+
+        // --- KM ---
+        let kmOverdue = false;
+        let kmNear = false;
+
+        if(m.nextKm && v.km){
+          let diff = m.nextKm - v.km;
+          kmOverdue = diff <= 0;
+          kmNear = diff > 0 && diff <= 1000;
+        }
+
+        // Si no hay nada relevante → no alerta
+        if(!dateOverdue && !dateNear && !kmOverdue && !kmNear) return;
+
+        // Prioridad: CADUCADO > PRÓXIMO | FECHA > KM
+        let overdue = dateOverdue || kmOverdue;
+        let reason = dateOverdue || dateNear ? 'fecha' : 'km';
+        let value  = reason === 'fecha'
+          ? m.date
+          : `${m.nextKm} km`;
+
+        out += `
+          <div class="alert ${overdue ? 'overdue' : ''}">
+            <a href="#"
+               onclick="viewVehicle('${v.id}'); return false;">
+              Mantenimiento ${overdue ? 'CADUCADO' : 'próximo'} (${reason}):
+              <strong>${v.matricula}</strong> – ${value}
+            </a>
+          </div>
+        `;
+      });
+  });
+
+  document.getElementById('maintenanceAlerts').innerHTML =
+    out || '<div class="small">Sin mantenimientos próximos (30 días / 1000 km)</div>';
+}
+
+
+
+// ---- Vista vehículo, historial, mantenimiento y documentos ----
+function viewVehicle(id){
+  let data = loadAll();
+  let v = data.vehicles.find(x=>x.id==id);
+  if(!v) return;
+
+  let maint = data.maintenance
+    .filter(m=>m.vehicleId==id)
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  let docs = data.docs.filter(d=>d.vehicleId==id);
+
+  let html = `
+    <h3>${v.matricula} — ${v.marca||''} ${v.modelo||''}</h3>
+
+    <h4>Acciones rápidas</h4>
+    <div class="quick-actions">
+      <button class="btn alt" onclick="printFicha('${v.id}')">Imprimir ficha</button>
+      <button class="btn warn" onclick="updateKm('${v.id}')">Actualizar KM</button>
+      <button class="btn" onclick="showMaintForm('${v.id}')">Añadir mantenimiento</button>
+      <button class="btn" onclick="showDocForm('${v.id}')">Añadir documento</button>
+    </div>
+
+    <div id="formTop"></div>
+
+    <div class="small" style="margin-top:6px">
+      <div><strong>KM actuales:</strong> ${v.km||0} &nbsp; 
+      <strong>Consumo:</strong> ${v.consumo||''}</div>
+
+      <div><strong>Ubicación:</strong> ${v.ubicacion||''}</div>
+
+      <div>
+        <strong>ITV:</strong> ${v.itvDate||'--'} &nbsp; 
+        <strong>Seguro:</strong> ${v.seguroDate||'--'}
+      </div>
+    </div>
+
+    <h4>Observaciones</h4>
+    <p style="white-space:pre-wrap;">${v.observaciones||''}</p>
+  `;
+
+  // 👉 DOCUMENTOS AHORA VAN ANTES DEL HISTORIAL
+  html += '<h4>Documentos / Enlaces</h4>';
+
+  if(docs.length==0){
+    html += '<div class="nodata">Sin documentos</div>';
+  } else {
+    docs.forEach(d=>{
+      html += `
+        <div>
+          <a class="link doc-item" href="${d.url}" target="_blank" data-id="${d.id}" data-vid="${id}">
+            ${d.title||d.url}
+          </a>
+          <span onclick="delDoc('${d.id}','${id}')" 
+                style="cursor:pointer;color:red;margin-left:6px">🗑️</span>
+        </div>`;
+    });
+  }
+
+  // 👉 HISTORIAL VA DESPUÉS
+  html += '<h4>Historial de mantenimiento</h4>';
+
+  if(maint.length==0){
+    html += '<div class="nodata">Sin historial</div>';
+  } else {
+    html += `
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha próximo mantenimiento</th>
+            <th>Fecha realizado</th>
+            <th>KM</th>
+            <th>Tipo</th>
+            <th style="width:300px;">Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+ maint.forEach(m=>{
+  html += `
+    <tr>
+      <td style="text-align:center; line-height:1.2;">
+        ${m.date ? `<div style="font-size:0.9em;">${m.date}</div>` : ''}
+${m.nextKm ? `<div style="font-size:0.85em;">${m.nextKm}km</div>` : ''}
+      </td>
+
+      <td>${m.realDate || ''}</td>
+      <td>${m.km || ''}</td>
+      <td>${m.type || ''}</td>
+
+      <td class="hist-notas"
+          data-texto="${(m.notes||'').replace(/"/g,'&quot;')}">
+        <span style="color:blue;cursor:pointer;margin-left:6px"
+              onclick="editMaint('${m.id}', '${id}')">✏️</span>
+        <span style="color:red;cursor:pointer;margin-left:6px"
+              onclick="delMaint('${m.id}', '${id}')">🗑️</span>
+      </td>
+    </tr>
+  `;
+});
+
+
+    html += '</tbody></table>';
+  }
+
+  document.getElementById('quickView').innerHTML = html;
+}
+
+/* ---- Formulario nuevo mantenimiento ---- */
+function showMaintForm(vehicleId){
+  let html = `
+    <div style="margin-top:6px">
+
+      <div class="input-row">
+        <div>
+          <label class="label-mini">PRÓXIMO MANTENIMIENTO</label>
+          <input id="m_date" type="date" style="width:130px;">
+ 
+          <label class="label-mini" style="margin-top:6px;">
+            KM PRÓXIMO MANTENIMIENTO
+          </label>
+          <input
+            id="m_nextKm"
+            type="number"
+            placeholder="KM PRÓXIMO"
+            style="width:130px;"
+          >
+        </div>
+
+        <div>
+          <label class="label-mini">FECHA REALIZADO</label>
+          <input id="m_realDate" type="date">
+        </div>
+
+        <input id="m_km" class="small-input" placeholder="KM REALIZADO">
+        <input id="m_type" placeholder="Tipo (aceite, revisión...)">
+      </div>
+
+      <label class="label-mini">NOTAS</label>
+      <textarea id="m_notes" rows="2" style="width:100%; white-space:pre-wrap;" placeholder="Notas"></textarea>
+
+      <div style="margin-top:6px">
+        <button class="btn alt" onclick="addMaintenance('${vehicleId}')">Guardar mantenimiento</button>
+        <button class="btn" onclick="document.getElementById('formTop').innerHTML=''">Cancelar</button>
+      </div>
+
+    </div>
+  `;
+
+  document.getElementById('formTop').innerHTML = html;
+}
+
+function addMaintenance(vehicleId){
+  let data = loadAll();
+  let m = {
+    id: uid(),
+    vehicleId: vehicleId,
+    date: document.getElementById('m_date').value,
+nextKm: document.getElementById('m_nextKm')
+          ? Number(document.getElementById('m_nextKm').value) || ''
+          : '',
+
+    km: Number(document.getElementById('m_km').value||0),
+    type: document.getElementById('m_type').value,
+    nextDate: "",
+    realDate: document.getElementById('m_realDate').value,
+    notes: document.getElementById('m_notes').value
+  };
+
+  data.maintenance.push(m);
+
+  let v = data.vehicles.find(x=>x.id==vehicleId);
+  if(v && m.km && m.km>v.km){ 
+    v.km = m.km; 
+  }
+
+  saveAll(data);
+  viewVehicle(vehicleId);
+  renderTable();
+}
+
+/* ---- Documentos ---- */
+function showDocForm(vehicleId){
+  let html = `
+    <div style="margin-top:6px">
+      <input id="doc_title" placeholder="Título (ej: Póliza seguro)">
+      <input id="doc_url" placeholder="URL (enlace Google Drive o web)">
+      <div style="margin-top:6px">
+        <button class="btn alt" onclick="addDoc('${vehicleId}')">Guardar documento</button>
+        <button class="btn" onclick="document.getElementById('formTop').innerHTML=''">Cancelar</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('formTop').innerHTML = html;
+}
+
+function addDoc(vehicleId){
+  let data = loadAll();
+  let d = { 
+    id: uid(), 
+    vehicleId: vehicleId, 
+    title: document.getElementById('doc_title').value, 
+    url: document.getElementById('doc_url').value 
+  };
+
+  data.docs.push(d);
+  saveAll(data);
+
+  viewVehicle(vehicleId);
+}
+
+/* ---- Editar vehículo ---- */
+function editVehicle(id){
+  let data = loadAll();
+  let v = data.vehicles.find(x=>x.id==id);
+  showAddForm(v);
+}
+
+/* ---- Actualización manual de KM ---- */
+function updateKm(id){
+  let data = loadAll();
+  let v = data.vehicles.find(x=>x.id==id);
+
+  if(!v) return;
+
+  let input = prompt("Nuevo KM actuales para " + (v.matricula||""), v.km||0);
+  if(input===null) return;
+
+  input = input.toString().trim();
+  if(!input) return;
+
+  let newKm = Number(input);
+  if(isNaN(newKm) || newKm<0){
+    alert("KM no válido");
+    return;
+  }
+
+  if(!data.km_logs) data.km_logs = [];
+
+  data.km_logs.push({
+    id: uid(),
+    vehicleId: v.id,
+    date: new Date().toISOString().slice(0,10),
+    km: newKm,
+    notes: "Actualización de kilometraje"
+  });
+
+  v.km = newKm;
+  saveAll(data);
+
+  renderTable();
+  viewVehicle(id);
+}
+
+/* ---- Borrar vehículo ---- */
+function delVehicle(id){
+  if(!confirm('Borrar vehículo y su historial?')) return;
+  
+  let data = loadAll();
+  data.vehicles = data.vehicles.filter(x=>x.id!=id);
+  data.maintenance = data.maintenance.filter(m=>m.vehicleId!=id);
+  data.docs = data.docs.filter(d=>d.vehicleId!=id);
+
+  if(data.km_logs) data.km_logs = data.km_logs.filter(l=>l.vehicleId!=id);
+
+  saveAll(data);
+  renderTable();
+
+  document.getElementById('quickView').innerHTML='';
+}
+
+/* ---- Borrar mantenimiento ---- */
+function delMaint(mid, vid){
+  if(!confirm("¿Borrar este mantenimiento?")) return;
+
+  let data = loadAll();
+  data.maintenance = data.maintenance.filter(m => m.id !== mid);
+
+  saveAll(data);
+  viewVehicle(vid);
+  renderTable();
+}
+
+/* ---- Borrar documento ---- */
+function delDoc(did, vid){
+  if(!confirm("¿Borrar este documento?")) return;
+
+  let data = loadAll();
+  data.docs = data.docs.filter(d => d.id !== did);
+
+  saveAll(data);
+  viewVehicle(vid);
+}
+/* ---- Funciones auxiliares de impresión ---- */
+function escapeHtml(s){
+  if(!s) return '';
+  return s
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+function nl2br(s){
+  if(!s) return '';
+  return escapeHtml(s)
+    .replace(/\r\n/g,'\n')
+    .replace(/\r/g,'\n')
+    .replace(/\n/g,'<br>');
+}
+
+/* ---- Impresión de Ficha ---- */
+function printFicha(id){
+  let data = loadAll();
+  let v = data.vehicles.find(x=>x.id==id);
+
+  if(!v){
+    alert('Vehículo no encontrado');
+    return;
+  }
+
+  let maint = data.maintenance.filter(x=>x.vehicleId==id);
+  let logs = data.km_logs ? data.km_logs.filter(l=>l.vehicleId==id) : [];
+
+  let html = `
+    <h2>Ficha del Vehículo</h2>
+
+    <h3>${escapeHtml(v.matricula)} — ${escapeHtml(v.marca||'')} ${escapeHtml(v.modelo||'')}</h3>
+
+    <p>
+      <b>KM actuales:</b> ${escapeHtml(String(v.km||0))}<br>
+      <b>Consumo:</b> ${escapeHtml(v.consumo||'')}<br>
+      <b>Ubicación:</b> ${escapeHtml(v.ubicacion||'')}<br>
+      <b>ITV:</b> ${escapeHtml(v.itvDate||'')}<br>
+      <b>Seguro:</b> ${escapeHtml(v.seguroDate||'')}<br>
+    </p>
+
+    <h3>Observaciones</h3>
+    <p style="white-space:pre-wrap;">${nl2br(v.observaciones||'')}</p>
+
+    <h3>Historial de mantenimiento</h3>
+
+<div class="table-wrapper">
+<table class="history-table">
+  <tr>
+    <th>Próximo</th>
+    <th>Realizado</th>
+    <th>KM</th>
+    <th>Tipo</th>
+    <th>Notas</th>
+  </tr>
+
+  ${maint.map(m=>`
+    <tr>
+      <td style="white-space:pre-line; text-align:center;">
+  ${escapeHtml(m.date||'')}${m.nextKm ? `\n${escapeHtml(String(m.nextKm))} km` : ''}
+</td>
+
+      <td>${escapeHtml(m.realDate||'')}</td>
+      <td>${escapeHtml(String(m.km||''))}</td>
+      <td>${escapeHtml(m.type||'')}</td>
+      <td>${nl2br(m.notes||'')}</td>
+    </tr>
+  `).join('')}
+</table>
+</div>
+
+
+    <h3>Registro de KM</h3>
+  `;
+
+  if(logs.length==0){
+    html += "<p class='small'>Sin registros de KM</p>";
+  } else {
+    html += `
+      
+
+${logs.length === 0 ? `
+  <p class="small">Sin registros de KM</p>
+` : `
+<div class="table-wrapper">
+<table class="km-table">
+  <tr>
+    <th>Fecha</th>
+    <th>KM</th>
+    <th>Notas</th>
+  </tr>
+
+  ${logs.map(l=>`
+    <tr>
+      <td>${escapeHtml(l.date||'')}</td>
+      <td>${escapeHtml(String(l.km||''))}</td>
+      <td>${nl2br(l.notes||'')}</td>
+    </tr>
+  `).join('')}
+</table>
+</div>
+`}
+`;
+  }
+
+  document.getElementById("printReport").innerHTML = html;
+  window.print();
+}
+
+/* ---- Edición de mantenimiento ---- */
+function editMaint(mid, vid){
+  let data = loadAll();
+  let m = data.maintenance.find(x=>x.id===mid);
+
+  if(!m) return;
+
+  let box = document.createElement('div');
+  box.id = 'editBox_'+mid;
+
+  box.innerHTML = `
+    <hr><h4>Editar mantenimiento</h4>
+
+    <div class="input-row">
+      <div>
+  <label class="label-mini">PRÓXIMO MANTENIMIENTO</label>
+  <input id="em_date_${mid}" type="date" value="${m.date||''}" style="width:130px;">
+
+  <label class="label-mini" style="margin-top:4px;">KM PRÓXIMO</label>
+  <input id="em_nextKm_${mid}" type="number" value="${m.nextKm||''}" style="width:130px;">
+</div>
+
+
+      <div>
+        <label class="label-mini">FECHA REALIZADO</label>
+        <input id="em_realDate_${mid}" type="date" value="${m.realDate||''}">
+      </div>
+
+      <input id="em_km_${mid}" class="small-input" value="${m.km||''}">
+      <input id="em_type_${mid}" value="${m.type||''}">
+    </div>
+
+    <label class="label-mini">NOTAS</label>
+    <textarea id="em_notes_${mid}" rows="2" style="width:100%; white-space:pre-wrap;">${m.notes||''}</textarea>
+
+    <div style="margin-top:6px">
+      <button class="btn alt" onclick="saveEditedMaint('${mid}','${vid}')">Guardar</button>
+      <button class="btn" onclick="document.getElementById('editBox_${mid}').remove()">Cancelar</button>
+    </div>
+  `;
+
+  document.getElementById('formTop').appendChild(box);
+}
+
+function saveEditedMaint(mid, vid){
+  let data = loadAll();
+  let i = data.maintenance.findIndex(x=>x.id===mid);
+  if(i<0) return;
+
+  data.maintenance[i].date = document.getElementById('em_date_'+mid).value;
+data.maintenance[i].nextKm =
+  document.getElementById('em_nextKm_'+mid)
+    ? Number(document.getElementById('em_nextKm_'+mid).value) || ''
+    : '';
+  data.maintenance[i].realDate = document.getElementById('em_realDate_'+mid).value;
+  data.maintenance[i].km = Number(document.getElementById('em_km_'+mid).value||0);
+  data.maintenance[i].type = document.getElementById('em_type_'+mid).value;
+  data.maintenance[i].notes = document.getElementById('em_notes_'+mid).value;
+
+  saveAll(data);
+  viewVehicle(vid);
+  renderTable();
+}
+/* ---- Exportar / importar ---- */
+function exportData(){
+
+  // 🔒 BLOQUEO EN DEMO
+  if (!isLicensed()) {
+    alert(
+      "La exportación de datos no está disponible en la versión de demostración.\n\n" +
+      "Para exportar tus datos necesitas una licencia."
+    );
+    return;
+  }
+
+  let data = loadAll();
+  let blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement('a'); 
+  a.href=url; 
+  a.download = 'fleet_export_' + new Date().toISOString().slice(0,10) + '.json'; 
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+
+function importDataFile(e){
+
+  // 🔒 BLOQUEO EN DEMO
+  if (!isLicensed()) {
+    alert(
+      "La importación de datos no está disponible en la versión de demostración.\n\n" +
+      "Para importar datos necesitas una licencia."
+    );
+    e.target.value = '';
+    return;
+  }
+
+  let file = e.target.files[0];
+  if(!file) return;
+
+  let reader = new FileReader();
+  reader.onload = function(){
+    try{
+      let obj = JSON.parse(reader.result);
+      saveAll(obj);
+      alert('Importado correctamente');
+      renderTable();
+    } catch(err){
+      alert('JSON inválido');
+    }
+  };
+
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+
+function downloadBackup(){
+  exportData();
+}
+
+/* ---- Demo de prueba (Ctrl+Shift+D) ---- */
+function importDemo(){
+  let data = {
+    vehicles:[
+      {
+        id:'v1',
+        matricula:'5981LWF',
+        marca:'Ford',
+        modelo:'Transit',
+        combustible:'Diésel',
+        km:120000,
+        ubicacion:'Garaje',
+        consumo:'9.5',
+        itvDate:'2025-12-15',
+        seguroDate:'2026-01-10',
+        observaciones:'Operativo\nNotas multilínea:\n- Revisión frenos\n- Correa cambiada'
+      }
+    ],
+    maintenance:[
+      {
+        id:'m1',
+        vehicleId:'v1',
+        date:'2025-10-01',
+        km:119000,
+        type:'Aceite',
+        notes:'Cambio aceite y filtros\nTrabajo completado correctamente'
+      }
+    ],
+    docs:[
+      {id:'d1',vehicleId:'v1',title:'Póliza seguro 2025',url:'https://drive.google.com/'}
+    ],
+    km_logs:[]
+  };
+
+  saveAll(data);
+  renderTable();
+}
+
+document.addEventListener('keydown', function(e){
+  if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()=='d'){
+    importDemo();
+  }
+});
+
+/* ---- Inicio de la app ---- */
+renderTable();
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const lic = localStorage.getItem("fms_license");
+  if (lic) {
+    const el = document.getElementById("licenseInfo");
+    if (el) {
+      el.innerText = "Licencia: " + lic;
+    }
+  }
+});
+</script>
+<script>
+function handleImportClick(){
+
+  // 🔒 BLOQUEO EN DEMO
+  if (!isLicensed()) {
+    alert(
+      "La importación de datos no está disponible en la versión de demostración.\n\n" +
+      "Para importar datos necesitas una licencia."
+    );
+    return;
+  }
+
+  document.getElementById('importFile').click();
+}
+</script>
+<script>
+function showActivationPopup(){
+
+  const deviceId = localStorage.getItem("fms_device_id");
+
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.background = "rgba(0,0,0,0.5)";
+  overlay.style.zIndex = "99999";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+
+  overlay.innerHTML = `
+    <div style="
+      background:white;
+      padding:24px;
+      border-radius:6px;
+      border:1px solid #ccc;
+      width:380px;
+      text-align:center;
+      font-family:Arial;
+    ">
+     <h3>Activar licencia</h3>
+
+<p style="font-size:13px;text-align:left">
+Para activar la licencia siga estos pasos:
+<br><br>
+<p>
+1. Adquiera la licencia oficial de FleetMS a través de eBay:
+<br>
+<a href="https://ebay.us/m/lvJIaE" target="_blank" style="font-weight:bold">
+👉 Comprar licencia FleetMS en eBay
+</a>
+<br><br>
+
+📧 También puede adquirir la licencia o solicitar asistencia escribiendo a:
+<br>
+<a href="mailto:fleetmssimple@gmail.com?subject=Licencia FleetMS">
+fleetmssimple@gmail.com
+</a>
+
+<br><br>
+
+2. Tras la compra, recibirá un mensaje solicitando el <strong>ID del equipo</strong>.
+<br>
+<strong>ID del equipo:</strong> ${deviceId}
+
+<br><br>
+
+3. Una vez verificada la compra, recibirá su clave de activación.
+<br>
+El plazo habitual de entrega es inferior a 24 horas.
+</p>
+
+<hr>
+
+<p><strong>ID del equipo:</strong><br>${deviceId}</p>
+
+
+      <input id="licenseKey"
+        placeholder="Introduce tu clave"
+        style="width:100%;padding:8px">
+
+      <br><br>
+      <button onclick="activateFromDemo()">Activar</button>
+      <button onclick="this.closest('div').parentElement.remove()"
+        style="margin-left:6px">Cancelar</button>
+
+      <p id="msg" style="color:red;margin-top:10px"></p>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+}
+
+function activateFromDemo(){
+  const key = document.getElementById("licenseKey").value.trim();
+  const deviceId = localStorage.getItem("fms_device_id");
+
+  if (validateLicense(key, deviceId)) {
+    localStorage.setItem("fms_activated", "true");
+    localStorage.setItem("fms_license", key);
+    location.reload();
+  } else {
+    document.getElementById("msg").innerText =
+      "Licencia no válida para este equipo";
+  }
+}
+
+
+</script>
+<div id="legalText" style="display:none">
+<h3>Licencia de uso – FleetMS Simple Portable</h3>
+
+<p>
+FleetMS Simple Portable es una aplicación portable destinada al control y
+mantenimiento de vehículos, que funciona de manera local en el navegador
+del usuario, sin conexión a internet.
+</p>
+
+<p><strong>Condiciones de uso</strong></p>
+<ul>
+  <li>Licencia de uso personal o de uso interno profesional.</li>
+  <li>Una licencia válida por equipo.</li>
+  <li>Licencia de pago único, sin límite temporal.</li>
+</ul>
+
+<p><strong>Versión de demostración</strong></p>
+<p>
+La aplicación puede incluir una versión de demostración limitada en el tiempo
+y/o en funcionalidades. Finalizado dicho periodo, será necesaria la activación
+de una licencia para continuar su uso completo.
+</p>
+
+<p><strong>Limitaciones</strong></p>
+<ul>
+  <li>Queda prohibida la redistribución total o parcial del software.</li>
+  <li>No está permitido compartir la aplicación ni la licencia.</li>
+  <li>No se permite la modificación del código ni la eliminación de los
+      sistemas de protección.</li>
+</ul>
+
+<p><strong>Responsabilidad</strong></p>
+<p>
+El software se proporciona “tal cual”, sin garantías explícitas o implícitas.
+El autor no se hace responsable de pérdidas de datos ni de daños derivados
+del uso del software.
+</p>
+
+<p><strong>Propiedad intelectual</strong></p>
+<p>
+FleetMS Simple Portable está protegido por la legislación vigente en materia
+de propiedad intelectual.
+</p>
+
+<p style="margin-top:12px;font-size:12px">
+© 2025 – FleetMS Simple Portable · Todos los derechos reservados
+</p>
+</div>
+<script>
+<script>
+function showLegal() {
+
+  // Evita duplicados
+  if (document.getElementById("legalOverlay")) return;
+
+  const overlay = document.createElement("div");
+  overlay.id = "legalOverlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.background = "rgba(0,0,0,0.6)";
+  overlay.style.zIndex = "99999";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+
+  const box = document.createElement("div");
+  box.style.background = "white";
+  box.style.maxWidth = "700px";
+  box.style.maxHeight = "80vh";
+  box.style.overflow = "auto";
+  box.style.padding = "20px";
+  box.style.borderRadius = "6px";
+
+  box.innerHTML =
+    document.getElementById("legalText").innerHTML +
+    '<div style="text-align:right;margin-top:10px">' +
+    '<button onclick="closeLegal()">Cerrar</button>' +
+    '</div>';
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+function closeLegal() {
+  const overlay = document.getElementById("legalOverlay");
+  if (overlay) overlay.remove();
+}
+</script>
+
+<script>
+/* ===============================
+   MOTOR DE IDIOMAS – FleetMS
+   =============================== */
+
+const LANGS = {
+  es: {
+    appTitle: "FleetMS Simple Portable",
+    demo: "Versión de demostración – quedan {days} días",
+    activate: "Activar licencia",
+    demoEnded: "Demo finalizada",
+    demoEndedText: "El periodo de demostración ha finalizado.",
+    enterKey: "Introduce tu clave",
+    invalidLicense: "Licencia no válida para este equipo",
+    close: "Cerrar",
+    legal: "Acerca de / Licencia"
+  },
+  en: {
+    appTitle: "FleetMS Simple Portable",
+    demo: "Demo version – {days} days left",
+    activate: "Activate license",
+    demoEnded: "Demo expired",
+    demoEndedText: "The demo period has ended.",
+    enterKey: "Enter your license key",
+    invalidLicense: "License not valid for this device",
+    close: "Close",
+    legal: "About / License"
+  },
+  pt: {
+    appTitle: "FleetMS Simple Portable",
+    demo: "Versão de demonstração – faltam {days} dias",
+    activate: "Ativar licença",
+    demoEnded: "Demonstração finalizada",
+    demoEndedText: "O período de demonstração terminou.",
+    enterKey: "Introduza a sua chave",
+    invalidLicense: "Licença não válida para este equipamento",
+    close: "Fechar",
+    legal: "Sobre / Licença"
+  }
+};
+
+function getLang(){
+  return localStorage.getItem("fms_lang") || detectLang();
+}
+
+function setLang(lang){
+  localStorage.setItem("fms_lang", lang);
+  location.reload();
+}
+
+function detectLang(){
+  const n = navigator.language.toLowerCase();
+  if (n.startsWith("es")) return "es";
+  if (n.startsWith("pt")) return "pt";
+  return "en";
+}
+
+function t(key, vars={}){
+  const lang = getLang();
+  let txt = (LANGS[lang] && LANGS[lang][key]) || LANGS.es[key] || key;
+  Object.keys(vars).forEach(k=>{
+    txt = txt.replace(`{${k}}`, vars[k]);
+  });
+  return txt;
+}
+</script>
+<script>
+localStorage.setItem("fms_lang","es");
+</script>
+<script>
+/* ===== LICENCIA DEFINITIVA ===== */
+const FMS_SECRET = "SZAFLEETMS2025"; // NO la cambies una vez vendas
+</script>
+<script>
+function validateLicense(key, deviceId){
+
+  if(!key || !deviceId) return false;
+
+  // Esperado: FMS-YYYY-NNN-XXXX
+  const parts = key.split("-");
+  if(parts.length !== 4) return false;
+
+  const prefix = parts[0];
+  const year   = parts[1];
+  const seq    = parts[2];
+  const code   = parts[3];
+
+  if(prefix !== "FMS") return false;
+
+  // Algoritmo: código final depende del ID + secreto
+  const base = deviceId + FMS_SECRET + year + seq;
+  const hash = simpleHash(base).slice(0,4);
+
+  return code === hash;
+}
+
+function simpleHash(str){
+  let h = 0;
+  for(let i=0;i<str.length;i++){
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h).toString(36).toUpperCase();
+}
+</script>
+<script>
+/* ===== LICENCIA DEFINITIVA ===== */
+const FMS_SECRET = "SZAFLEETMS2025";
+
+function validateLicense(key, deviceId){
+  if(!key || !deviceId) return false;
+
+  const parts = key.split("-");
+  if(parts.length !== 4) return false;
+
+  const prefix = parts[0];
+  const year   = parts[1];
+  const seq    = parts[2];
+  const code   = parts[3];
+
+  if(prefix !== "FMS") return false;
+
+  const base = deviceId + FMS_SECRET + year + seq;
+  const hash = simpleHash(base).slice(0,4);
+
+  return code === hash;
+}
+
+function simpleHash(str){
+  let h = 0;
+  for(let i = 0; i < str.length; i++){
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h).toString(36).toUpperCase();
+}
+</script>
+<script>
+function toggleMenu() {
+  document.body.classList.toggle("menu-open");
+}
+</script>
+
+<!-- ================================= -->
+<!-- PROTECCIÓN DE DATOS Y CONTACTO -->
+<!-- ================================= -->
+
+<div id="privacy-panel" style="
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:9999;
+">
+
+  <div style="
+    background:#fff;
+    max-width:900px;
+    margin:40px auto;
+    padding:20px;
+    max-height:85%;
+    overflow-y:auto;
+  ">
+  <div id="privacyText" style="display:none">
+  <h2>Protección de datos y contacto</h2>
+
+  <h3>Política de privacidad</h3>
+  <p>
+    FleetMS Simple Portable es una aplicación que funciona de forma totalmente
+    local en el navegador del usuario.
+  </p>
+  <p>
+    La aplicación no recopila, almacena ni transmite datos personales a
+    servidores externos. Toda la información introducida por el usuario se
+    guarda exclusivamente en el almacenamiento local del navegador
+    (localStorage).
+  </p>
+  <p>
+    FleetMS Simple Portable no utiliza cookies, no realiza seguimiento de
+    usuarios ni comparte información con terceros.
+  </p>
+  <p>
+    El usuario es el único responsable de los datos que introduce y gestiona
+    dentro de la aplicación.
+  </p>
+
+  <h3>Contacto</h3>
+  <p>
+    Para cualquier consulta o soporte relacionado con la aplicación, puede
+    contactar a través del siguiente correo electrónico:
+  </p>
+  <p><strong>fleetmssimple@gmail.com</strong></p>
+
+  <p style="margin-top:20px; font-size:0.9em; color:#666;">
+    Última actualización: febrero de 2026
+  </p>
+</div>
+
+<script>
+  // ===== MODAL LEGAL =====
+  function showLegal() {
+
+    // Evitar duplicados
+    if (document.getElementById("legalOverlay")) return;
+
+    const overlay = document.createElement("div");
+    overlay.id = "legalOverlay";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100vw";
+    overlay.style.height = "100vh";
+    overlay.style.background = "rgba(0,0,0,0.6)";
+    overlay.style.zIndex = "99999";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+
+    const box = document.createElement("div");
+    box.style.background = "#fff";
+    box.style.maxWidth = "700px";
+    box.style.maxHeight = "80vh";
+    box.style.overflow = "auto";
+    box.style.padding = "20px";
+    box.style.borderRadius = "6px";
+
+    box.innerHTML =
+      document.getElementById("legalText").innerHTML +
+      '<div style="text-align:right;margin-top:10px">' +
+      '<button onclick="closeLegal()">Cerrar</button>' +
+      '</div>';
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  }
+
+  function closeLegal() {
+    const overlay = document.getElementById("legalOverlay");
+    if (overlay) overlay.remove();
+  }
+</script>
+<script>
+function showPrivacy() {
+
+  // Evitar duplicados
+  if (document.getElementById("legalOverlay")) return;
+
+  const overlay = document.createElement("div");
+  overlay.id = "legalOverlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.background = "rgba(0,0,0,0.6)";
+  overlay.style.zIndex = "99999";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+
+  const box = document.createElement("div");
+  box.style.background = "white";
+  box.style.maxWidth = "700px";
+  box.style.maxHeight = "80vh";
+  box.style.overflow = "auto";
+  box.style.padding = "20px";
+  box.style.borderRadius = "6px";
+
+  box.innerHTML =
+    document.getElementById("privacyText").innerHTML +
+    '<div style="text-align:right;margin-top:10px">' +
+    '<button onclick="closeLegal()">Aceptar y continuar</button>' +
+    '</div>';
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+</script>
+<script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
