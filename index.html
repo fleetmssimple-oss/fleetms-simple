@@ -633,7 +633,10 @@ function showExpiredScreen(deviceId){
  <a onclick="showLegal()">Términos y condiciones</a><br>
 <a onclick="showPrivacy()">Política de privacidad</a><br>
 <a href="mailto:fleetmssimple@gmail.com">Contacto</a>
+
 </div>
+
+
 
   </div>
   <div class="main">
@@ -2033,18 +2036,18 @@ function showPrivacy() {
   box.innerHTML =
     document.getElementById("privacyText").innerHTML +
     '<div style="text-align:right;margin-top:10px">' +
-    '<button onclick="closeLegal()">Cerrar</button>' +
+    '<button onclick="closeLegal()">Aceptar y continuar</button>' +
     '</div>';
 
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 }
 </script>
+<script>
+
 
 </body>
 </html>
-
-
 
 
 
